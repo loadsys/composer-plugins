@@ -7,15 +7,12 @@
 
 namespace Loadsys\Composer;
 
-// Needed for LibraryInstaller:
 use Composer\Composer;
-use Composer\Installer\LibraryInstaller;
 use Composer\IO\IOInterface;
+use Composer\Installer\LibraryInstaller;
 use Composer\Package\PackageInterface;
-
-// Needed for copying the release folder to the root.
-use \DirectoryIterator;
 use \RecursiveCallbackFilterIterator;
+use \RecursiveDirectoryIterator;
 use \RecursiveIteratorIterator;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -53,50 +50,6 @@ class PhpcsCodingStandardInstaller extends LibraryInstaller {
 	public function supports($packageType) {
 		return ('phpcs-coding-standard' === $packageType);
 	}
-
-	/**
-	 * Return the install path based on package type.
-	 *
-	 * @param PackageInterface $package
-	 * @param string $frameworkType
-	 * @return string
-	 */
-// 	public function getInstallPath(PackageInterface $package, $frameworkType = '') {
-// 		$type = $this->package->getType();
-//
-// 		$prettyName = $this->package->getPrettyName();
-// 		if (strpos($prettyName, '/') !== false) {
-// 			list($vendor, $name) = explode('/', $prettyName);
-// 		} else {
-// 			$vendor = '';
-// 			$name = $prettyName;
-// 		}
-//
-// 		$availableVars = $this->inflectPackageVars(compact('name', 'vendor', 'type'));
-//
-// 		$extra = $package->getExtra();
-// 		if (!empty($extra['installer-name'])) {
-// 			$availableVars['name'] = $extra['installer-name'];
-// 		}
-//
-// 		if ($this->composer->getPackage()) {
-// 			$extra = $this->composer->getPackage()->getExtra();
-// 			if (!empty($extra['installer-paths'])) {
-// 				$customPath = $this->mapCustomInstallPaths($extra['installer-paths'], $prettyName, $type);
-// 				if ($customPath !== false) {
-// 					return $this->templatePath($customPath, $availableVars);
-// 				}
-// 			}
-// 		}
-//
-// 		$packageType = substr($type, strlen($frameworkType) + 1);
-// 		$locations = $this->getLocations();
-// 		if (!isset($locations[$packageType])) {
-// 			throw new \InvalidArgumentException(sprintf('Package type "%s" is not supported', $type));
-// 		}
-//
-// 		return $this->templatePath($locations[$packageType], $availableVars);
-// 	}
 
 	/**
 	 * Scan $basePath for folders that contain `ruleset.xml` files.
@@ -165,7 +118,7 @@ class PhpcsCodingStandardInstaller extends LibraryInstaller {
 	 * @param InstalledRepositoryInterface $repo	repository in which to check
 	 * @param PackageInterface			 $package package instance
 	 */
-	protected function installCode(PackageInterface $package) {
+	protected function installCode(\Composer\Package\PackageInterface $package) {
 		parent::installCode($package);
 
 		if (!$this->supports($package->getType())) {
@@ -185,7 +138,6 @@ class PhpcsCodingStandardInstaller extends LibraryInstaller {
 		$rulesets = $this->findRulesetFolders($packageBasePath);
 		$destDir = $this->findCodesnifferRoot();
 
-
 		// Return true if the first part of the subpath for the current file exists in the accept array.
 		$acceptFunc = function ($current, $key, $iterator) use ($rulesets) {
 			$pathComponents = explode(DS, $iterator->getSubPathname());
@@ -198,48 +150,4 @@ class PhpcsCodingStandardInstaller extends LibraryInstaller {
 		$filesystem = new Filesystem();
 		$filesystem->mirror($packageBasePath, $destDir, $codingStandardsFolders, ['override' => true]);
 	}
-
-	/**
-	 * Search for a config file in the consuming project and copy it into
-	 * place if present.
-	 *
-	 */
-// 	protected function copyConfigFile($package) {
-// 		$configFilePath = getcwd() . DS . 'puphpet.yaml';
-// 		$targetPath = getcwd() . DS . 'puphpet' . DS . 'config.yaml';
-// 		if (is_readable($configFilePath)) {
-// 			copy($configFilePath, $targetPath);
-// 		}
-// 	}
-
-	/**
-	 * Check that release items copied into the consuming project are
-	 * properly ignored in source control (very, VERY crudely.)
-	 *
-	 */
-// 	protected function checkGitIgnore($package) {
-// 		$gitFolder = getcwd() . DS . '.git' . DS;
-//
-// 		if (!file_exists($gitFolder)) {
-// 			return;
-// 		}
-//
-// 		$gitignoreFile = getcwd() . DS . '.gitignore';
-// 		$required = [
-// 			'/Vagrantfile',
-// 			'/puphpet/',
-// 			'/.vagrant/',
-// 		];
-//
-// 		touch($gitignoreFile);
-// 		$lines = file($gitignoreFile, FILE_IGNORE_NEW_LINES);
-//
-// 		foreach ($required as $entry) {
-// 			if (!in_array($entry, $lines)) {
-// 				$lines[] = $entry;
-// 			}
-// 		}
-//
-// 		file_put_contents($gitignoreFile, implode(PHP_EOL, $lines));
-// 	}
 }
