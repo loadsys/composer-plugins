@@ -11,6 +11,7 @@ use Composer\Composer;
 use Composer\IO\IOInterface;
 use Composer\Installer\LibraryInstaller;
 use Composer\Package\PackageInterface;
+use Composer\Util\Filesystem;
 use \RecursiveCallbackFilterIterator;
 use \RecursiveDirectoryIterator;
 use \RecursiveIteratorIterator;
@@ -26,17 +27,6 @@ if (!defined('DS')) {
  *
  */
 class PhpcsCodingStandardInstaller extends LibraryInstaller {
-
-	/**
-	 * Initializes base installer.
-	 *
-	 * @param IOInterface $io
-	 * @param Composer $composer
-	 */
-	public function __construct(IOInterface $io, Composer $composer) {
-		$this->io = $io;
-		$this->composer = $composer;
-	}
 
 	/**
 	 * Defines the `type`s of composer packages to which this installer applies.
@@ -76,8 +66,7 @@ class PhpcsCodingStandardInstaller extends LibraryInstaller {
 	 */
 	protected function findCodesnifferRoot() {
 		// approach 1
-// 		$vendorDir = $this->composer->getConfig()->get('vendor-dir');
-// 		return $vendorDir . DS . 'squizlabs/php_codesniffer/CodeSniffer/Standards';
+// 		return $this->vendorDir . DS . 'squizlabs/php_codesniffer/' . 'CodeSniffer/Standards';
 
 
 		// approach 2
