@@ -14,7 +14,7 @@ use Composer\Package\PackageInterface;
 use \RecursiveCallbackFilterIterator;
 use \RecursiveDirectoryIterator;
 use \RecursiveIteratorIterator;
-use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Filesystem\Filesystem as SymfonyFilesytem;
 
 if (!defined('DS')) {
 	define('DS', DIRECTORY_SEPARATOR);
@@ -147,7 +147,7 @@ class PhpcsCodingStandardInstaller extends LibraryInstaller {
 		$filterIterator = new RecursiveCallbackFilterIterator($dirIterator, $acceptFunc);
 		$codingStandardsFolders = new RecursiveIteratorIterator($filterIterator, RecursiveIteratorIterator::SELF_FIRST);
 
-		$filesystem = new Filesystem();
+		$filesystem = new SymfonyFilesytem();
 		$filesystem->mirror($packageBasePath, $destDir, $codingStandardsFolders, ['override' => true]);
 	}
 }
