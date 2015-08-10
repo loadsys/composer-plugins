@@ -85,17 +85,19 @@ class PhpcsCodingStandardInstallerTest extends \PHPUnit_Framework_TestCase {
     }
 
     /**
-     * test findRulesetFolders()
+     * test installCode()
      *
      * @return void
      */
-    public function testFindRulesetFolders() {
+    public function testInstallCode() {
         $sampleDir = dirname(dirname(dirname(dirname(__FILE__)))) . '/samples';
         $expected = array(
         	'CodingStandardOne',
         	'SecondStandard',
         );
-        $result = $this->Installer->findRulesetFolders($sampleDir);
+        $package = $this->getMock('@TODO');
+
+        $result = $this->Installer->installCode($package);
 
         $this->assertEquals(
         	$expected,
