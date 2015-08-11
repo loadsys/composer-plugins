@@ -71,10 +71,11 @@ class PhpcsCodingStandardInstallerTest extends \PHPUnit_Framework_TestCase {
         	array('CamelCased', '1.0', '1.0')
         );
         $downloadManager = $this->getMock('\Composer\Downloader\DownloadManager', array(), array($this->io));
+        $installationManager = $this->getMock('\Composer\Installer\InstallationManager', array(), array());
         $this->hook = new StubPhpcsCodingStandardHook();
         $this->composer = new \Composer\Composer();
         $this->composer->setConfig(new \Composer\Config(false, $this->baseDir));
-        $this->composer->setInstallationManager(new \Composer\Installer\InstallationManager());
+        $this->composer->setInstallationManager($installationManager);
         $this->composer->setDownloadManager($downloadManager);
         $this->Installer = new TestPhpcsCodingStandardInstaller(
         	$this->io,
@@ -133,7 +134,7 @@ class PhpcsCodingStandardInstallerTest extends \PHPUnit_Framework_TestCase {
         	'Return value should always be null.'
         );
         $this->assertEquals(
-        	array('mirrorCodingStandardFolders' => array($this->package)),
+        	array('mirrorCodingStandardFolders' => array($this->composer, null)),
         	$this->Installer->hook->calls,
         	'Our mocked static class should have registered a single call to mirrorCodingStandardFolders().'
         );

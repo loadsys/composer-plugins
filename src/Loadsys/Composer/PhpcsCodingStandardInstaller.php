@@ -67,7 +67,8 @@ class PhpcsCodingStandardInstaller extends LibraryInstaller {
 			return;
 		}
 
-		$this->hook->mirrorCodingStandardFolders($package);
+		$installPath = $this->composer->getInstallationManager()->getInstallPath($package);
+		$this->hook->mirrorCodingStandardFolders($this->composer, $installPath);
 	}
 
 	/**
@@ -84,7 +85,8 @@ class PhpcsCodingStandardInstaller extends LibraryInstaller {
 			return;
 		}
 
-		$this->hook->mirrorCodingStandardFolders($target);
+		$installPath = $this->composer->getInstallationManager()->getInstallPath($target);
+		$this->hook->mirrorCodingStandardFolders($this->composer, $installPath);
 	}
 
 	/**
@@ -95,7 +97,8 @@ class PhpcsCodingStandardInstaller extends LibraryInstaller {
 	 */
 	protected function removeCode(PackageInterface $package) {
 		if ($this->supports($package->getType())) {
-			$this->hook->deleteCodingStandardFolders($package);
+			$installPath = $this->composer->getInstallationManager()->getInstallPath($package);
+			$this->hook->deleteCodingStandardFolders($this->composer, $installPath);
 		}
 
 		parent::removeCode($package);

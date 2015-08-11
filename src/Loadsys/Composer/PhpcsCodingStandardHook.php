@@ -65,8 +65,8 @@ class PhpcsCodingStandardHook {
 	 * @return void
 	 */
 	public static function postInstall(PackageEvent $event) {
-		$packages = $event
-			->getComposer()
+		$composer = $event->getComposer();
+		$packages = $composer
 			->getRepositoryManager()
 			->getLocalRepository()
 			->getPackages()
@@ -82,7 +82,8 @@ class PhpcsCodingStandardHook {
 			// Otherwise, check for Coding Standard folders and copy them.
 			// (This is a relatively quick no-op if there are no
 			// `ruleset.xml` files in the package.)
-			self::mirrorCodingStandardFolders($package);
+			$installPath = $composer->getInstallationManager()->getInstallPath($package);
+			self::mirrorCodingStandardFolders($composer, $installPath);
 		}
 	}
 
@@ -112,20 +113,22 @@ class PhpcsCodingStandardHook {
 		// Otherwise, check for Coding Standard folders in the package
 		// about to be removed, and remove them from the
 		// CodeSniffer/Standards/ first.
-		self::deleteCodingStandardFolders($package);
+		$composer = $event->getComposer();
+		$installPath = $composer->getInstallationManager()->getInstallPath($package);
+		self::deleteCodingStandardFolders($composer, $installPath);
 	}
 
 	/**
 	 * Mirror (copy or delete, only as necessary) items from the installed
 	 * package's release/ folder into the target directory.
 	 *
-	 * @param \Composer\Package\PackageInterface $package The composer Package being installed.
+	 * @param \Composer\Composer $composer Active composer instance.
+	 * @param \Composer\Package\PackageInterface $package The installation path for the Package being installed.
 	 * @return void
 	 */
-	public static function mirrorCodingStandardFolders(PackageInterface $package) {
-		$packageBasePath = $package->getComposer()->getInstallationManager()->getInstallPath($package);
+	public static function mirrorCodingStandardFolders(Composer $composer, $packageBasePath) {
 		$rulesets = self::findRulesetFolders($packageBasePath);
-		$destDir = self::findCodesnifferRoot($package->getComposer());
+		$destDir = self::findCodesnifferRoot($composer);
 
 		// No-op if no ruleset.xml's found or squizlabs/php_codesniffer not installed.
 		if (empty($rulesets) || !$destDir) {
@@ -168,15 +171,16 @@ class PhpcsCodingStandardHook {
 	/**
 	 * Remove Coding Standards folders from phpcs.
 	 *
-	 * Check the to-be-removed package for Coding Standard folders, remove those folders from the CodeSniffer/Standards/ dir.
+	 * Check the to-be-removed package for Coding Standard folders,
+	 * remove those folders from the CodeSniffer/Standards/ dir.
 	 *
-	 * @param \Composer\Package\PackageInterface $package The composer Package about to be removed.
+	 * @param \Composer\Composer $composer Active composer instance.
+	 * @param \Composer\Package\PackageInterface $package The installation path for the Package about to be removed.
 	 * @return void
 	 */
-	public function deleteCodingStandardFolders(PackageInterface $package) {
-		$packageBasePath = $package->getComposer()->getInstallationManager()->getInstallPath($package);
+	public static function deleteCodingStandardFolders(Composer $composer, $packageBasePath) {
 		$rulesets = self::findRulesetFolders($packageBasePath);
-		$destDir = self::findCodesnifferRoot($package->getComposer());
+		$destDir = self::findCodesnifferRoot($composer);
 
 		// No-op if no ruleset.xml's found.
 		if (empty($rulesets) || !$destDir) {
