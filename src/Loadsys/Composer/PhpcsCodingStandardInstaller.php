@@ -5,27 +5,40 @@
  * Ensures that a composer package with `type=phpcs-coding-standard`
  * in its composer.json file will have any subfolders that contain
  * a `ruleset.xml` file  copied into the
- * `VENDOR/squizlabs/php_codesniffer/CodeSniffer/Standards/` folder.
+ * `VENDOR/squizlabs/php_codesniffer/CodeSniffer/Standards/` folder
+ * during installation, and removed during uninstallation.
  */
 
 namespace Loadsys\Composer;
 
+use Composer\Composer;
 use Composer\Installer\LibraryInstaller;
+use Composer\IO\IOInterface;
 use Composer\Package\PackageInterface;
+use Composer\Util\Filesystem;
 use Loadsys\Composer\PhpcsCodingStandardHook;
 
-if (!defined('DS')) {
-	define('DS', DIRECTORY_SEPARATOR);
-}
-
 /**
- * PHP CodeSniffer Coding Standard Installer
+ * PHP CodeSniffer Coding Standard "Copying" Installer
  *
- * Hooks the ::installCode() step to perform additional detection
- * of Coding Standard folders in the current package, and copies
- * them to the CodeSniffer/Standards folder.
+ * Hooks the ::installCode(), ::updateCode() and ::removeCode() steps
+ * to perform additional detection of Coding Standard folders in the
+ * current package, and copies them to the CodeSniffer/Standards folder.
  */
 class PhpcsCodingStandardInstaller extends LibraryInstaller {
+
+    /**
+     * Initializes library installer.
+     *
+     * @param IOInterface $io
+     * @param Composer    $composer
+     * @param string      $type
+     * @param Filesystem  $filesystem
+     */
+    public function __construct(IOInterface $io, Composer $composer, $type = 'library', Filesystem $filesystem = null, $hook = null) {
+    	parent::__construct($io, $composer, $type, $filesystem);
+    	$this->hook = (!is_null($hook) ? $hook : new PhpcsCodingStandardHook());
+	}
 
 	/**
 	 * Defines the `type`s of composer packages to which this installer applies.
@@ -54,7 +67,7 @@ class PhpcsCodingStandardInstaller extends LibraryInstaller {
 			return;
 		}
 
-		PhpcsCodingStandardHook::mirrorCodingStandardFolders($package);
+		$this->hook->mirrorCodingStandardFolders($package);
 	}
 
 	/**
@@ -65,24 +78,13 @@ class PhpcsCodingStandardInstaller extends LibraryInstaller {
 	 * @return void
 	 */
 	protected function updateCode(PackageInterface $initial, PackageInterface $target) {
-		//@TODO: Adapt to re-copy the Standards folders.
-		//parent::updateCode($initial, $target);
+		parent::updateCode($initial, $target);
 
-		$initialDownloadPath = $this->getInstallPath($initial);
-		$targetDownloadPath = $this->getInstallPath($target);
-		if ($targetDownloadPath !== $initialDownloadPath) {
-			// if the target and initial dirs intersect, we force a remove + install
-			// to avoid the rename wiping the target dir as part of the initial dir cleanup
-			if (substr($initialDownloadPath, 0, strlen($targetDownloadPath)) === $targetDownloadPath
-				|| substr($targetDownloadPath, 0, strlen($initialDownloadPath)) === $initialDownloadPath
-			) {
-				$this->removeCode($initial);
-				$this->installCode($target);
-				return;
-			}
-			$this->filesystem->rename($initialDownloadPath, $targetDownloadPath);
+		if (!$this->supports($package->getType())) {
+			return;
 		}
-		$this->downloadManager->update($initial, $target, $targetDownloadPath);
+
+		$this->hook->mirrorCodingStandardFolders($target);
 	}
 
 	/**
@@ -92,10 +94,10 @@ class PhpcsCodingStandardInstaller extends LibraryInstaller {
 	 * @return void
 	 */
 	protected function removeCode(PackageInterface $package) {
-		//@TODO: Adapt to remove the copied Standards folders.
-		//parent::removeCode($package);
+		if ($this->supports($package->getType())) {
+			$this->hook->deleteCodingStandardFolders($package);
+		}
 
-		$downloadPath = $this->getPackageBasePath($package);
-		$this->downloadManager->remove($package, $downloadPath);
+		parent::removeCode($package);
 	}
 }

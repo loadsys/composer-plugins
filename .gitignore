@@ -5,3 +5,4 @@ composer.phar
 
 # Ignore the folder we use when testing the installers.
 /build/*
+/tmp

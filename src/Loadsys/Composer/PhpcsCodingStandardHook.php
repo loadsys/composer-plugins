@@ -51,7 +51,43 @@ class PhpcsCodingStandardHook {
 	const PHPCS_PACKAGE_TYPE = 'phpcs-coding-standard';
 
 	/**
-	 * Intended for use as a post-install-cmd script.
+	 * Intended for use as a post-install-cmd/post-update-cmd script.
+	 *
+	 * Scans all packages just installed for subfolders containing
+	 * `ruleset.xml` files, and mirrors those folders into the
+	 * CodeSniffer/Standards/ folder of the squizlabs/php_codesniffer
+	 * package, if present.
+	 *
+	 * No-op if there are no `ruleset.xml` files or the PHP CodeSniffer
+	 * package is not installed, making it safe to run on every package.
+	 *
+	 * @param \Composer\Installer\PackageEvent $event The composer Package event being fired.
+	 * @return void
+	 */
+	public static function postInstall(PackageEvent $event) {
+		$packages = $event
+			->getComposer()
+			->getRepositoryManager()
+			->getLocalRepository()
+			->getPackages()
+		;
+
+		foreach ($packages as $package) {
+			// If the package defines the correct type,
+			// it will have already been handled by the Installer.
+			if ($package->getType() === self::PHPCS_PACKAGE_TYPE) {
+				return;
+			}
+
+			// Otherwise, check for Coding Standard folders and copy them.
+			// (This is a relatively quick no-op if there are no
+			// `ruleset.xml` files in the package.)
+			self::mirrorCodingStandardFolders($package);
+		}
+	}
+
+	/**
+	 * Intended for use as a pre-package-uninstall script.
 	 *
 	 * Scans each package as it is installed for subfolders containing
 	 * `ruleset.xml` files, and mirrors those folders into the
@@ -64,36 +100,32 @@ class PhpcsCodingStandardHook {
 	 * @param \Composer\Installer\PackageEvent $event The composer Package event being fired.
 	 * @return void
 	 */
-//@TODO: This should really be set to trigger on post-install and post-update, and loop over ALL locally installed packages, instead of firing repeatedly as each package goes in. That would make it more likely that the squizlabs/php_codesniffer folder will already be present.
-	public static function postPackageInstall(PackageEvent $event) {
-		$installedPackage = $event->getOperation()->getPackage();
+	public static function prePackageUninstall(PackageEvent $event) {
+		$package = $event->getOperation()->getPackage();
 
-		// If the package defines the correct type,
-		// it will have already been copied by the Installer.
-		if ($installedPackage->getType() === self::PHPCS_PACKAGE_TYPE) {
+		// If the package defines the correct type, it's coding standard
+		// folders will have already been removed by the Installer.
+		if ($package->getType() === self::PHPCS_PACKAGE_TYPE) {
 			return;
 		}
 
-		// Otherwise, check for Coding Standard folders and copy them.
-		// (This is a relatively quick no-op if there are no
-		// `ruleset.xml` files in the package.)
-		self::mirrorCodingStandardFolders($event);
-
-//@TODO: Experiment with alternate approach of writing the "current" packages path into CodeSniffer.conf using new self::configInstalledPathAdd() method below.
+		// Otherwise, check for Coding Standard folders in the package
+		// about to be removed, and remove them from the
+		// CodeSniffer/Standards/ first.
+		self::deleteCodingStandardFolders($package);
 	}
 
 	/**
 	 * Mirror (copy or delete, only as necessary) items from the installed
 	 * package's release/ folder into the target directory.
 	 *
-	 * @param \Composer\Installer\PackageEvent $event The composer Package event being fired.
+	 * @param \Composer\Package\PackageInterface $package The composer Package being installed.
 	 * @return void
 	 */
-	public static function mirrorCodingStandardFolders(PackageEvent $event) {
-		$package = $event->getOperation()->getPackage();
+	public static function mirrorCodingStandardFolders(PackageInterface $package) {
 		$packageBasePath = $package->getComposer()->getInstallationManager()->getInstallPath($package);
 		$rulesets = self::findRulesetFolders($packageBasePath);
-		$destDir = self::findCodesnifferRoot($event);
+		$destDir = self::findCodesnifferRoot($package->getComposer());
 
 		// No-op if no ruleset.xml's found or squizlabs/php_codesniffer not installed.
 		if (empty($rulesets) || !$destDir) {
@@ -133,26 +165,28 @@ class PhpcsCodingStandardHook {
 		);
 	}
 
-	//@TODO: Write the removeStandards() method. Must take a single PackageEvent, scan that package for ruleset.xml folders, then remove the same ones from CodeSniffer/Standards/ if present. (Alternate approach is to remove the path to "this" package from CodeSniffer.conf using the new self::configInstalledPathRemove() method below.
-	public function removeStandards(PackageEvent $event) {
-	}
+	/**
+	 * Remove Coding Standards folders from phpcs.
+	 *
+	 * Check the to-be-removed package for Coding Standard folders, remove those folders from the CodeSniffer/Standards/ dir.
+	 *
+	 * @param \Composer\Package\PackageInterface $package The composer Package about to be removed.
+	 * @return void
+	 */
+	public function deleteCodingStandardFolders(PackageInterface $package) {
+		$packageBasePath = $package->getComposer()->getInstallationManager()->getInstallPath($package);
+		$rulesets = self::findRulesetFolders($packageBasePath);
+		$destDir = self::findCodesnifferRoot($package->getComposer());
 
-	//@TODO: doc block
-	public static function configInstalledPathAdd($path) {
-		//@TODO: write and test this:
-		$installedPaths = self::readInstalledPaths();
-		$installedPaths[] = $path;
-		return self::saveInstalledPaths($installedPaths);
-	}
-
-	//@TODO: doc block
-	public static function configInstalledPathRemove($path) {
-		//@TODO: write and test this:
-		$installedPaths = self::readInstalledPaths();
-		if ($key = array_search($path, $installedPaths)) {
-			unset($installedPaths[$key]);
+		// No-op if no ruleset.xml's found.
+		if (empty($rulesets) || !$destDir) {
+			return;
 		}
-		return self::saveInstalledPaths($installedPaths);
+
+		$filesystem = new Filesystem();
+		foreach ($rulesets as $ruleset) {
+			$filesystem->removeDirectory($destDir . DS . $ruleset);
+		}
 	}
 
 	/**
@@ -177,12 +211,12 @@ class PhpcsCodingStandardHook {
 	 *
 	 * Return the full system path if found, no trailing slash.
 	 *
-	 * @param Composer\Installer\PackageEvent $event Current composer event. Used to get access to the InstallationManager.
+	 * @param Composer\Composer $composer Used to get access to the InstallationManager.
 	 * @return string|false Full system path to the PHP CodeSniffer's "standards/" folder, false if not found.
 	 */
-	protected static function findCodesnifferRoot(PackageEvent $event) {
+	protected static function findCodesnifferRoot(Composer $composer) {
 		$phpcsPackage = new Package('squizlabs/php_codesniffer', '2.0', '');
-		$path = $event->getComposer()->getInstallationManager()->getInstallPath($phpcsPackage);
+		$path = $composer->getInstallationManager()->getInstallPath($phpcsPackage);
 
 		$path .= DS . 'CodeSniffer' . DS . 'Standards';
 		if (!is_readable($path)) {
@@ -192,6 +226,40 @@ class PhpcsCodingStandardHook {
 		return $path;
 	}
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// @TODO: Break this stuff out into a separate Hook class.
+
+
+	//@TODO: doc block
+	public static function configInstalledPathAdd($path) {
+		//@TODO: write and test this:
+		$installedPaths = self::readInstalledPaths();
+		$installedPaths[] = $path;
+		return self::saveInstalledPaths($installedPaths);
+	}
+
+	//@TODO: doc block
+	public static function configInstalledPathRemove($path) {
+		//@TODO: write and test this:
+		$installedPaths = self::readInstalledPaths();
+		if ($key = array_search($path, $installedPaths)) {
+			unset($installedPaths[$key]);
+		}
+		return self::saveInstalledPaths($installedPaths);
+	}
 	//@TODO: doc block
 	protected static function readInstalledPaths() {
 		self::codeSnifferInit();

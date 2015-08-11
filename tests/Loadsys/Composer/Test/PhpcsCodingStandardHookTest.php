@@ -7,6 +7,7 @@
 
 namespace Loadsys\Composer\Test;
 
+use Composer\Composer;
 use Composer\Installer\PackageEvent;
 use Loadsys\Composer\PhpcsCodingStandardHook;
 
@@ -17,8 +18,8 @@ class TestPhpcsCodingStandardHook extends PhpcsCodingStandardHook {
 	public static function findRulesetFolders($basePath) {
 		return parent::findRulesetFolders($basePath);
 	}
-	public static function findCodesnifferRoot(PackageEvent $event) {
-		return parent::findCodesnifferRoot($event);
+	public static function findCodesnifferRoot(Composer $composer) {
+		return parent::findCodesnifferRoot($composer);
 	}
 }
 
@@ -67,7 +68,7 @@ class PhpcsCodingStandardHookTest extends \PHPUnit_Framework_TestCase {
     }
 
     /**
-     * Helper function to recursively delete temporary directories created for tests.
+     * Helper method to recursively delete temporary directories created for tests.
      *
      * @return void
      */
@@ -82,12 +83,42 @@ class PhpcsCodingStandardHookTest extends \PHPUnit_Framework_TestCase {
 		rmdir($d);
 	}
 
+
+    /**
+     * Helper method to set up the proper paths for the
+     * CodeSniffer/Standards/ and currently-being-installed-package
+     * directories.
+     *
+     * The returned $composer mock will return each path for the
+     * matching method call to the mock. Remember that PHPUnit counts
+     * ALL mocked methods in sequence!
+     *
+     * @param array $installedPaths Numeric keys are the `at()` calls to `getInstallPath` where the matching string value is returned as the path.
+     * @return array [mocked \Composer\Composer, mocked \Composer\Package\Package]
+     */
+	protected function mockComposerAndPackage($getInstallPaths) {
+        $composer = $this->getMock('\Composer\Composer', array('getInstallationManager', 'getInstallPath'));
+		$composer->method('getInstallationManager')->will($this->returnSelf());
+		foreach ($getInstallPaths as $at => $path) {
+			$composer->expects($this->at($at))
+				->method('getInstallPath')
+				->willReturn($path);
+		}
+
+        $package = $this->getMockBuilder('\Composer\Package\Package')
+			->disableOriginalConstructor()
+			->setMethods(array('getComposer'))
+			->getMock();
+		$package->method('getComposer')->willReturn($composer);
+
+		return array($composer, $package);
+	}
     /**
      * test postPackageInstall()
      *
      * @return void
      */
-    public function testPostPackageInstallMatchingType() {
+    public function testPostInstallMatchingType() {
     	$this->marktestIncomplete('@TODO: Write a test where the package type is already phpcs-coding-standard');
     }
 
@@ -96,7 +127,7 @@ class PhpcsCodingStandardHookTest extends \PHPUnit_Framework_TestCase {
      *
      * @return void
      */
-    public function testPostPackageInstallNoStandards() {
+    public function testPostInstallNoStandards() {
     	$this->marktestIncomplete('@TODO: Write a test where the package does not have any stanrds to install.');
     }
 
@@ -105,7 +136,7 @@ class PhpcsCodingStandardHookTest extends \PHPUnit_Framework_TestCase {
      *
      * @return void
      */
-    public function testPostPackageInstallSuccessful() {
+    public function testPostInstallSuccessful() {
     	$this->marktestIncomplete('@TODO: Write a test where the package type is not phpcs-coding-standard and has standards to install.');
     }
 
@@ -115,27 +146,17 @@ class PhpcsCodingStandardHookTest extends \PHPUnit_Framework_TestCase {
      * @return void
      */
     public function testMirrorCodingStandardFoldersSuccessful() {
-        $event = $this->getMockBuilder('\Composer\Installer\PackageEvent')
-			->disableOriginalConstructor()
-			->setMethods(array('getOperation', 'getPackage', 'getComposer', 'getInstallationManager', 'getInstallPath'))
-			->getMock();
-		$event->method('getOperation')->will($this->returnSelf());
-		$event->method('getPackage')->will($this->returnSelf());
-		$event->method('getComposer')->will($this->returnSelf());
-		$event->method('getInstallationManager')->will($this->returnSelf());
-		$event->expects($this->at(4))
-			->method('getInstallPath')
-			->will($this->returnValue($this->sampleDir));
-		$event->expects($this->at(7))
-			->method('getInstallPath')
-			->will($this->returnValue($this->phpcsInstallDir));
+        list($composer, $package) = $this->mockComposerAndPackage(array(
+        	1 => $this->sampleDir,
+        	3 => $this->phpcsInstallDir,
+        ));
 
         $expected = array(
         	'CodingStandardOne',
         	'SecondStandard',
         );
 
-        $result = TestPhpcsCodingStandardHook::mirrorCodingStandardFolders($event);
+        $result = TestPhpcsCodingStandardHook::mirrorCodingStandardFolders($package);
 
         foreach ($expected as $standard) {
 			$this->assertTrue(
@@ -151,27 +172,17 @@ class PhpcsCodingStandardHookTest extends \PHPUnit_Framework_TestCase {
      * @return void
      */
     public function testMirrorCodingStandardFoldersNoDest() {
-        $event = $this->getMockBuilder('\Composer\Installer\PackageEvent')
-			->disableOriginalConstructor()
-			->setMethods(array('getOperation', 'getPackage', 'getComposer', 'getInstallationManager', 'getInstallPath'))
-			->getMock();
-		$event->method('getOperation')->will($this->returnSelf());
-		$event->method('getPackage')->will($this->returnSelf());
-		$event->method('getComposer')->will($this->returnSelf());
-		$event->method('getInstallationManager')->will($this->returnSelf());
-		$event->expects($this->at(4))
-			->method('getInstallPath')
-			->will($this->returnValue($this->sampleDir));
-		$event->expects($this->at(7))
-			->method('getInstallPath')
-			->will($this->returnValue(false));
+        list($composer, $package) = $this->mockComposerAndPackage(array(
+        	1 => $this->sampleDir,
+        	3 => false,
+        ));
 
         $expected = array(
         	'CodingStandardOne',
         	'SecondStandard',
         );
 
-        $result = TestPhpcsCodingStandardHook::mirrorCodingStandardFolders($event);
+        $result = TestPhpcsCodingStandardHook::mirrorCodingStandardFolders($package);
 
         foreach ($expected as $standard) {
 			$this->assertFalse(
@@ -206,17 +217,11 @@ class PhpcsCodingStandardHookTest extends \PHPUnit_Framework_TestCase {
      * @return void
      */
     public function testFindCodesnifferRootExists() {
-        $event = $this->getMockBuilder('\Composer\Installer\PackageEvent')
-			->disableOriginalConstructor()
-			->setMethods(array('getComposer', 'getInstallationManager', 'getInstallPath'))
-			->getMock();
-		$event->method('getComposer')->will($this->returnSelf());
-		$event->method('getInstallationManager')->will($this->returnSelf());
-		$event->expects($this->once())
-			->method('getInstallPath')
-			->will($this->returnValue($this->phpcsInstallDir));
+        list($composer, $package) = $this->mockComposerAndPackage(array(
+        	1 => $this->phpcsInstallDir,
+        ));
 
-        $result = TestPhpcsCodingStandardHook::findCodesnifferRoot($event);
+        $result = TestPhpcsCodingStandardHook::findCodesnifferRoot($composer);
 
         $this->assertEquals(
         	$this->standardsInstallDir,
@@ -231,17 +236,11 @@ class PhpcsCodingStandardHookTest extends \PHPUnit_Framework_TestCase {
      * @return void
      */
     public function testFindCodesnifferRootDoesNotExist() {
-        $event = $this->getMockBuilder('\Composer\Installer\PackageEvent')
-			->disableOriginalConstructor()
-			->setMethods(array('getComposer', 'getInstallationManager', 'getInstallPath'))
-			->getMock();
-		$event->method('getComposer')->will($this->returnSelf());
-		$event->method('getInstallationManager')->will($this->returnSelf());
-		$event->expects($this->once())
-			->method('getInstallPath')
-			->will($this->returnValue('does-not-exist'));
+        list($composer, $package) = $this->mockComposerAndPackage(array(
+        	1 => 'does-not-exist',
+        ));
 
-        $result = TestPhpcsCodingStandardHook::findCodesnifferRoot($event);
+        $result = TestPhpcsCodingStandardHook::findCodesnifferRoot($composer);
 
         $this->assertFalse(
         	$result,
