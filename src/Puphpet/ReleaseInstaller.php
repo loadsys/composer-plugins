@@ -1,27 +1,25 @@
 <?php
+/**
+ * Ensures that a package with type=puphpet-release has its `release/`
+ * subfolder copied into the project root, and associated configs copied
+ * into the `puphpet/` folder afterwards.
+ */
 
 namespace Loadsys\Composer\Puphpet;
 
-// Needed for LibraryInstaller:
-use Composer\Package\PackageInterface;
 use Composer\Installer\LibraryInstaller;
-
-// Needed for copying the release folder to the root.
-use \RecursiveDirectoryIterator;
-use \RecursiveCallbackFilterIterator;
-use \RecursiveIteratorIterator;
+use Composer\Package\PackageInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use \RecursiveCallbackFilterIterator;
+use \RecursiveDirectoryIterator;
+use \RecursiveIteratorIterator;
 
 if (!defined('DS')) {
 	define('DS', DIRECTORY_SEPARATOR);
 }
 
 /**
- * Custom installer and event handler.
- *
- * Ensures that a package with type=puphpet-release has its `release/`
- * subfolder copied into the project root, and associated configs copied
- * into the `puphpet/` folder afterwards.
+ * Puphpet\ReleastInstaller
  */
 class ReleaseInstaller extends LibraryInstaller {
 
@@ -41,8 +39,8 @@ class ReleaseInstaller extends LibraryInstaller {
 	/**
 	 * Override LibraryInstaller::installCode() to hook in additional post-download steps.
 	 *
-	 * @param InstalledRepositoryInterface $repo    repository in which to check
-	 * @param PackageInterface             $package package instance
+	 * @param PackageInterface $package package instance
+	 * @return void
 	 */
 	protected function installCode(PackageInterface $package) {
 		parent::installCode($package);
@@ -50,6 +48,7 @@ class ReleaseInstaller extends LibraryInstaller {
 		if (!$this->supports($package->getType())) {
 			return;
 		}
+
 		$this->mirrorReleaseItems($package);
 		$this->copyConfigFile($package);
 		$this->checkGitignore($package);
@@ -59,6 +58,8 @@ class ReleaseInstaller extends LibraryInstaller {
 	 * Mirror (copy or delete, only as necessary) items from the installed
 	 * package's release/ folder into the target directory.
 	 *
+	 * @param PackageInterface $package package instance
+	 * @return void
 	 */
 	protected function mirrorReleaseItems($package) {
 		// Copy everything from the release/ subfolder to the project root.
@@ -86,8 +87,9 @@ class ReleaseInstaller extends LibraryInstaller {
 	 * Search for a config file in the consuming project and copy it into
 	 * place if present.
 	 *
+	 * @return void
 	 */
-	protected function copyConfigFile($package) {
+	protected function copyConfigFile() {
 		$configFilePath = getcwd() . DS . 'puphpet.yaml';
 		$targetPath = getcwd() . DS . 'puphpet' . DS . 'config.yaml';
 		if (is_readable($configFilePath)) {
@@ -99,8 +101,9 @@ class ReleaseInstaller extends LibraryInstaller {
 	 * Check that release items copied into the consuming project are
 	 * properly ignored in source control (very, VERY crudely.)
 	 *
+	 * @return void
 	 */
-	protected function checkGitIgnore($package) {
+	protected function checkGitIgnore() {
 		$gitFolder = getcwd() . DS . '.git' . DS;
 
 		if (!file_exists($gitFolder)) {

@@ -12,22 +12,17 @@
 
 namespace Loadsys\Composer\PhpCodesniffer;
 
-
-
 use Composer\Composer;
-use Composer\IO\IOInterface;
 use Composer\Installer\PackageEvent;
+use Composer\IO\IOInterface;
 use Composer\Package\Package;
 use Composer\Package\PackageInterface;
 use Composer\Script\Event;
 use Composer\Util\Filesystem;
+use Symfony\Component\Filesystem\Filesystem as SymfonyFilesytem;
 use \RecursiveCallbackFilterIterator;
 use \RecursiveDirectoryIterator;
 use \RecursiveIteratorIterator;
-use Symfony\Component\Filesystem\Filesystem as SymfonyFilesytem;
-
-
-
 
 if (!defined('DS')) {
 	define('DS', DIRECTORY_SEPARATOR);
@@ -69,8 +64,7 @@ class CodingStandardHook {
 		$packages = $composer
 			->getRepositoryManager()
 			->getLocalRepository()
-			->getPackages()
-		;
+			->getPackages();
 
 		foreach ($packages as $package) {
 			// If the package defines the correct type,
@@ -123,7 +117,7 @@ class CodingStandardHook {
 	 * package's release/ folder into the target directory.
 	 *
 	 * @param \Composer\Composer $composer Active composer instance.
-	 * @param \Composer\Package\PackageInterface $package The installation path for the Package being installed.
+	 * @param string $packageBasePath The installation path for the Package being installed.
 	 * @return void
 	 */
 	public static function mirrorCodingStandardFolders(Composer $composer, $packageBasePath) {
@@ -164,7 +158,7 @@ class CodingStandardHook {
 			$packageBasePath,
 			$destDir,
 			$codingStandardsFolders,
-			array('override' => true)
+			['override' => true]
 		);
 	}
 
@@ -175,7 +169,7 @@ class CodingStandardHook {
 	 * remove those folders from the CodeSniffer/Standards/ dir.
 	 *
 	 * @param \Composer\Composer $composer Active composer instance.
-	 * @param \Composer\Package\PackageInterface $package The installation path for the Package about to be removed.
+	 * @param string $packageBasePath The installation path for the Package about to be removed.
 	 * @return void
 	 */
 	public static function deleteCodingStandardFolders(Composer $composer, $packageBasePath) {
@@ -203,7 +197,7 @@ class CodingStandardHook {
 	 * @return array Array of partial file paths (from $basePath) to folders containing a ruleset.xml, no leading or trailing slashes. Empty array if none found.
 	 */
 	protected static function findRulesetFolders($basePath) {
-		$rulesetFolders = array_map(function ($v) use ($basePath){
+		$rulesetFolders = array_map(function ($v) use ($basePath) {
 			return dirname(str_replace($basePath . DS, '', $v));
 		}, glob($basePath . DS . '*' . DS . 'ruleset.xml'));
 
@@ -231,56 +225,73 @@ class CodingStandardHook {
 	}
 
 
+// @TODO: Break this stuff out into a separate Hook class?
 
 
-
-
-
-
-
-
-
-
-
-
-
-// @TODO: Break this stuff out into a separate Hook class.
-
-
-	//@TODO: doc block
+	/**
+	 * Inject the provided filesystem path into phpcs's CodeSniffer.conf's [installed_paths] key.
+	 *
+	 * @param string $path The relative path to the coding standard folder to add.
+	 * @return bool True if the path was successfully added to the config file, false on failure.
+	 */
 	public static function configInstalledPathAdd($path) {
-		//@TODO: write and test this:
+		//@TODO: test configInstalledPathAdd()
 		$installedPaths = self::readInstalledPaths();
 		$installedPaths[] = $path;
 		return self::saveInstalledPaths($installedPaths);
 	}
 
-	//@TODO: doc block
+	/**
+	 * Remove the provided filesystem path into phpcs's CodeSniffer.conf's [installed_paths] key.
+	 *
+	 * @param string $path The relative path to the coding standard folder to remove.
+	 * @return bool True if the path was successfully removed to the config file, false on failure.
+	 */
 	public static function configInstalledPathRemove($path) {
-		//@TODO: write and test this:
+		//@TODO: test configInstalledPathRemove()
 		$installedPaths = self::readInstalledPaths();
-		if ($key = array_search($path, $installedPaths)) {
+		$key = array_search($path, $installedPaths);
+		if ($key) {
 			unset($installedPaths[$key]);
 		}
+
 		return self::saveInstalledPaths($installedPaths);
 	}
-	//@TODO: doc block
+
+	/**
+	 * Fetch the entire array of [installed_paths] from the phpcs config file.
+	 *
+	 * @return array Empty array if the config file load fails at all, otherwise the list of paths in the config.
+	 */
 	protected static function readInstalledPaths() {
+		//@TODO: test readInstalledPaths()
 		self::codeSnifferInit();
 		$pathsString = PHP_CodeSniffer::getInstalledStandardPaths();
 		if (is_null($pathsString)) {
-			return array();
+			return [];
 		}
+
 		return explode(',', $pathsString);
 	}
 
-	//@TODO: doc block
+	/**
+	 * Write an array of paths back into phpcs's config file's [installed_paths].
+	 *
+	 * @param array $paths Array of relative paths. Any duplicates will be stripped before saving.
+	 * @return bool True if the config file was written successfully, false on failure.
+	 */
 	protected static function saveInstalledPaths(array $paths) {
+		//@TODO: test saveInstalledPaths()
 		return PHP_CodeSniffer::setConfigData('installed_paths', implode(',', array_unique($paths)));
 	}
 
-	//@TODO: doc block
+	/**
+	 * Ensures that the PHP_CodeSniffer class is available for static access.
+	 *
+	 * @return void
+	 */
 	protected static function codeSnifferInit() {
+		//@TODO: test codeSnifferInit()
 		if (!class_exists('PHP_CodeSniffer')) {
 			$composerInstall = dirname(dirname(dirname(__FILE__))) . '/vendor/squizlabs/php_codesniffer/CodeSniffer.php';
 			if (file_exists($composerInstall)) {

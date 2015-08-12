@@ -27,17 +27,18 @@ use Loadsys\Composer\PhpCodesniffer\CodingStandardHook;
  */
 class CodingStandardInstaller extends LibraryInstaller {
 
-    /**
-     * Initializes library installer.
-     *
-     * @param IOInterface $io
-     * @param Composer    $composer
-     * @param string      $type
-     * @param Filesystem  $filesystem
-     */
-    public function __construct(IOInterface $io, Composer $composer, $type = 'library', Filesystem $filesystem = null, $hook = null) {
-    	parent::__construct($io, $composer, $type, $filesystem);
-    	$this->hook = (!is_null($hook) ? $hook : new CodingStandardHook());
+	/**
+	 * Initializes library installer.
+	 *
+	 * @param \Composer\IO\IOInterface $io Active I/O interface.
+	 * @param \Composer\Composer $composer Active Composer instance.
+	 * @param string $type Current package `type`.
+	 * @param \Composer\Util\Filesystem $filesystem Utility filesystem instance.
+	 * @param \Loadsys\Composer\PhpCodesniffer\CodingStandardHook $hook Instance of the hook class that does the heavy lifting for us.
+	 */
+	public function __construct(IOInterface $io, Composer $composer, $type = 'library', Filesystem $filesystem = null, $hook = null) {
+		parent::__construct($io, $composer, $type, $filesystem);
+		$this->hook = (!is_null($hook) ? $hook : new CodingStandardHook());
 	}
 
 	/**
