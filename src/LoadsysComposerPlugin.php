@@ -23,10 +23,10 @@ class LoadsysComposerPlugin implements PluginInterface {
 	 * @return void
 	 */
 	public function activate(Composer $composer, IOInterface $io) {
-		$puphpetReleaseInstaller = new PuphpetReleaseInstaller($io, $composer);
+		$puphpetReleaseInstaller = new Puphpet\ReleaseInstaller($io, $composer);
 		$composer->getInstallationManager()->addInstaller($puphpetReleaseInstaller);
 
-		$phpcsCodingStandardInstaller = new PhpcsCodingStandardInstaller($io, $composer);
+		$phpcsCodingStandardInstaller = new PhpCodesniffer\CodingStandardInstaller($io, $composer);
 		$composer->getInstallationManager()->addInstaller($phpcsCodingStandardInstaller);
 	}
 }

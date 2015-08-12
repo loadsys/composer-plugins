@@ -1,16 +1,16 @@
 <?php
 /**
- * PhpcsCodingStandardHook
+ * PhpCodesniffer\CodingStandardHook
  *
  * Provide both utility functions and end-user hooks for post-processing
  * composer packages that contain Coding Standards folders to assist
  * with "installing" them into the
  * `VENDOR/squizlabs/php_codesniffer/CodeSniffer/Standards/` folder.
  *
- * Used by the PhpcsCodingStandardInstaller class.
+ * Used by the CodingStandardInstaller class.
  */
 
-namespace Loadsys\Composer;
+namespace Loadsys\Composer\PhpCodesniffer;
 
 use Composer\Script\Event;
 use Composer\Installer\PackageEvent;
@@ -40,7 +40,7 @@ if (!defined('DS')) {
  * installation of non-compatible composer packages containing PHPCS
  * Coding Standards that don't define the `phpcs-coding-standard` type.
  */
-class PhpcsCodingStandardHook {
+class CodingStandardHook {
 
 	/**
 	 * The `type` used in a composer.json file to identify packages

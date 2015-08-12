@@ -1,20 +1,20 @@
 <?php
 /**
- * Tests for the PhpcsCodingStandardHook class.
+ * Tests for the PhpCodesniffer\CodingStandardHook class.
  *
  * Verify the individual components available for a la carte use.
  */
 
-namespace Loadsys\Composer\Test;
+namespace Loadsys\Composer\Test\TestCase\PhpCodesniffer;
 
 use Composer\Composer;
 use Composer\Installer\PackageEvent;
-use Loadsys\Composer\PhpcsCodingStandardHook;
+use Loadsys\Composer\PhpCodesniffer\CodingStandardHook;
 
 /**
  * Child class to expose protected methods for direct testing.
  */
-class TestPhpcsCodingStandardHook extends PhpcsCodingStandardHook {
+class TestCodingStandardHook extends CodingStandardHook {
 	public static function findRulesetFolders($basePath) {
 		return parent::findRulesetFolders($basePath);
 	}
@@ -24,9 +24,9 @@ class TestPhpcsCodingStandardHook extends PhpcsCodingStandardHook {
 }
 
 /**
- * PhpcsCodingStandardHook Test
+ * CodingStandardHook Test
  */
-class PhpcsCodingStandardHookTest extends \PHPUnit_Framework_TestCase {
+class CodingStandardHookTest extends \PHPUnit_Framework_TestCase {
     private $package;
     private $composer;
     private $io;
@@ -44,7 +44,7 @@ class PhpcsCodingStandardHookTest extends \PHPUnit_Framework_TestCase {
         $this->standardsInstallDir = $this->phpcsInstallDir . '/CodeSniffer/Standards';
         mkdir($this->standardsInstallDir, 0777, true);
 
-        $this->sampleDir = dirname(dirname(dirname(dirname(__FILE__)))) . '/samples';
+        $this->sampleDir = $this->baseDir . '/tests/samples';
 
         $this->package = new \Composer\Package\Package('CamelCased', '1.0', '1.0');
         $this->io = $this->getMock('\Composer\IO\IOInterface');
@@ -155,7 +155,7 @@ class PhpcsCodingStandardHookTest extends \PHPUnit_Framework_TestCase {
         	'SecondStandard',
         );
 
-        $result = TestPhpcsCodingStandardHook::mirrorCodingStandardFolders($composer, $this->sampleDir);
+        $result = TestCodingStandardHook::mirrorCodingStandardFolders($composer, $this->sampleDir);
 
         foreach ($expected as $standard) {
 			$this->assertTrue(
@@ -180,7 +180,7 @@ class PhpcsCodingStandardHookTest extends \PHPUnit_Framework_TestCase {
         	'SecondStandard',
         );
 
-        $result = TestPhpcsCodingStandardHook::mirrorCodingStandardFolders($composer, $this->sampleDir);
+        $result = TestCodingStandardHook::mirrorCodingStandardFolders($composer, $this->sampleDir);
 
         foreach ($expected as $standard) {
 			$this->assertFalse(
@@ -200,7 +200,7 @@ class PhpcsCodingStandardHookTest extends \PHPUnit_Framework_TestCase {
         	'CodingStandardOne',
         	'SecondStandard',
         );
-        $result = TestPhpcsCodingStandardHook::findRulesetFolders($this->sampleDir);
+        $result = TestCodingStandardHook::findRulesetFolders($this->sampleDir);
 
         $this->assertEquals(
         	$expected,
@@ -219,7 +219,7 @@ class PhpcsCodingStandardHookTest extends \PHPUnit_Framework_TestCase {
         	1 => $this->phpcsInstallDir,
         ));
 
-        $result = TestPhpcsCodingStandardHook::findCodesnifferRoot($composer);
+        $result = TestCodingStandardHook::findCodesnifferRoot($composer);
 
         $this->assertEquals(
         	$this->standardsInstallDir,
@@ -238,7 +238,7 @@ class PhpcsCodingStandardHookTest extends \PHPUnit_Framework_TestCase {
         	1 => 'does-not-exist',
         ));
 
-        $result = TestPhpcsCodingStandardHook::findCodesnifferRoot($composer);
+        $result = TestCodingStandardHook::findCodesnifferRoot($composer);
 
         $this->assertFalse(
         	$result,

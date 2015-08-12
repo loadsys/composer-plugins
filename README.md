@@ -55,13 +55,13 @@ To use this hook script, add the following to your root project's `composer.json
     },
     "scripts": {
         "post-install-cmd": [
-            "Loadsys\\Composer\\PhpcsCodingStandardHook::postInstall"
+            "Loadsys\\Composer\\PhpCodesniffer\\CodingStandardHook::postInstall"
         ],
         "post-update-cmd": [
-            "Loadsys\\Composer\\PhpcsCodingStandardHook::postInstall"
+            "Loadsys\\Composer\\PhpCodesniffer\\CodingStandardHook::postInstall"
         ],
         "pre-package-uninstall": [
-            "Loadsys\\Composer\\PhpcsCodingStandardHook::prePackageUninstall"
+            "Loadsys\\Composer\\PhpCodesniffer\\CodingStandardHook::prePackageUninstall"
         ]
     }
 }
@@ -98,13 +98,13 @@ To use this hook script, add the following to your root project's `composer.json
     },
     "scripts": {
         "post-install-cmd": [
-            "Loadsys\\Composer\\PhpcsCodingStandardHook::postInstall"
+            "Loadsys\\Composer\\PhpCodesniffer\\CodingStandardHook::postInstall"
         ],
         "post-update-cmd": [
-            "Loadsys\\Composer\\PhpcsCodingStandardHook::postInstall"
+            "Loadsys\\Composer\\PhpCodesniffer\\CodingStandardHook::postInstall"
         ],
         "pre-package-uninstall": [
-            "Loadsys\\Composer\\PhpcsCodingStandardHook::prePackageUninstall"
+            "Loadsys\\Composer\\PhpCodesniffer\\CodingStandardHook::prePackageUninstall"
         ]
     }
 }

@@ -1,30 +1,26 @@
 <?php
 /**
- * Tests for the PhpcsCodingStandardInstaller.
+ * Tests for the PhpCodesniffer\CodingStandardInstaller.
  *
  * Verify that the installer engages for the correct plugin type, is
  * able to locate coding standard folders correctly, and can locate
  * the proper destination folder for them.
  */
 
-namespace Loadsys\Composer\Test;
+namespace Loadsys\Composer\Test\TestCase\PhpCodesniffer;
 
 use Composer\Package\PackageInterface;
-use Loadsys\Composer\PhpcsCodingStandardHook;
-use Loadsys\Composer\PhpcsCodingStandardInstaller;
+use Loadsys\Composer\PhpCodesniffer\CodingStandardHook;
+use Loadsys\Composer\PhpCodesniffer\CodingStandardInstaller;
 
 /**
- * Test stub of the PhpcsCodingStandardHook class.
+ * Test stub of the PhpCodesniffer\CodingStandardHook class.
  *
- * Instead of `use Loadsys\Composer\PhpcsCodingStandardHook;`, define
- * a class with known operations to isolate the installer from the
- * filesystem side-effects for testing. Methods set internal
- * properties for test inspection.
- *
- * This class **MUST** be declared before the "real" class would be
- * autoloaded by our SUT.
+ * Define a class to inject into the installer with known operations to
+ * isolate the installer from the filesystem side-effects for testing.
+ * Methods set internal properties for test inspection.
  */
-class StubPhpcsCodingStandardHook {
+class StubCodingStandardHook {
 	public $calls = array();
 	public function __call($name, $arguments) {
 		$this->calls[$name] = $arguments;
@@ -36,7 +32,7 @@ class StubPhpcsCodingStandardHook {
  * Expose protected methods for direct testing, since this class doesn't
  * otherwise expose public interfaces to us.
  */
-class TestPhpcsCodingStandardInstaller extends PhpcsCodingStandardInstaller {
+class TestCodingStandardInstaller extends CodingStandardInstaller {
 	public function installCode(PackageInterface $package) {
 		return parent::installCode($package);
 	}
@@ -49,9 +45,9 @@ class TestPhpcsCodingStandardInstaller extends PhpcsCodingStandardInstaller {
 }
 
 /**
- * PhpcsCodingStandardInstaller Test
+ * PhpCodesniffer\CodingStandardInstaller Test
  */
-class PhpcsCodingStandardInstallerTest extends \PHPUnit_Framework_TestCase {
+class CodingStandardInstallerTest extends \PHPUnit_Framework_TestCase {
     private $package;
     private $composer;
     private $io;
@@ -72,12 +68,12 @@ class PhpcsCodingStandardInstallerTest extends \PHPUnit_Framework_TestCase {
         );
         $downloadManager = $this->getMock('\Composer\Downloader\DownloadManager', array(), array($this->io));
         $installationManager = $this->getMock('\Composer\Installer\InstallationManager', array(), array());
-        $this->hook = new StubPhpcsCodingStandardHook();
+        $this->hook = new StubCodingStandardHook();
         $this->composer = new \Composer\Composer();
         $this->composer->setConfig(new \Composer\Config(false, $this->baseDir));
         $this->composer->setInstallationManager($installationManager);
         $this->composer->setDownloadManager($downloadManager);
-        $this->Installer = new TestPhpcsCodingStandardInstaller(
+        $this->Installer = new TestCodingStandardInstaller(
         	$this->io,
         	$this->composer,
         	'library',
@@ -124,7 +120,7 @@ class PhpcsCodingStandardInstallerTest extends \PHPUnit_Framework_TestCase {
     public function testInstallCodeCorrectType() {
         $this->package->expects($this->any())
         	->method('getType')
-        	->willReturn(PhpcsCodingStandardHook::PHPCS_PACKAGE_TYPE);
+        	->willReturn(CodingStandardHook::PHPCS_PACKAGE_TYPE);
 
         $result = $this->Installer->installCode($this->package);
 

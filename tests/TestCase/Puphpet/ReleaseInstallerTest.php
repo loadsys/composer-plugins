@@ -1,7 +1,7 @@
 <?php
-namespace Loadsys\Composer\Test;
+namespace Loadsys\Composer\Test\TestCase\Puphpet;
 
-use Loadsys\Composer\PuphpetReleaseInstaller;
+use Loadsys\Composer\Puphpet\ReleaseInstaller;
 use Composer\IO\IOInterface;
 use Composer\Repository\RepositoryManager;
 use Composer\Repository\InstalledArrayRepository;
@@ -12,7 +12,7 @@ use Composer\Package\Version\VersionParser;
 use Composer\Composer;
 use Composer\Config;
 
-class PuphpetReleaseInstallerTest extends \PHPUnit_Framework_TestCase {
+class ReleaseInstallerTest extends \PHPUnit_Framework_TestCase {
     private $package;
     private $composer;
     private $io;
@@ -50,6 +50,6 @@ class PuphpetReleaseInstallerTest extends \PHPUnit_Framework_TestCase {
      * @return void
      */
     public function testNothing() {
-        $this->markTestIncomplete('@TODO: No tests written for PuphpetReleaseInstaller.');
+        $this->markTestIncomplete('@TODO: No tests written for Puphpet\ReleaseInstaller.');
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Loadsys\Composer;
+namespace Loadsys\Composer\Puphpet;
 
 // Needed for LibraryInstaller:
 use Composer\Package\PackageInterface;
@@ -23,7 +23,7 @@ if (!defined('DS')) {
  * subfolder copied into the project root, and associated configs copied
  * into the `puphpet/` folder afterwards.
  */
-class PuphpetReleaseInstaller extends LibraryInstaller {
+class ReleaseInstaller extends LibraryInstaller {
 
 	/**
 	 * Defines the `type`s of composer packages to which this installer applies.

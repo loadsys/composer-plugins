@@ -1,6 +1,6 @@
 <?php
 /**
- * PhpcsCodingStandardInstaller
+ * PhpCodesniffer\CodingStandardInstaller
  *
  * Ensures that a composer package with `type=phpcs-coding-standard`
  * in its composer.json file will have any subfolders that contain
@@ -9,14 +9,14 @@
  * during installation, and removed during uninstallation.
  */
 
-namespace Loadsys\Composer;
+namespace Loadsys\Composer\PhpCodesniffer;
 
 use Composer\Composer;
 use Composer\Installer\LibraryInstaller;
 use Composer\IO\IOInterface;
 use Composer\Package\PackageInterface;
 use Composer\Util\Filesystem;
-use Loadsys\Composer\PhpcsCodingStandardHook;
+use Loadsys\Composer\PhpCodesniffer\CodingStandardHook;
 
 /**
  * PHP CodeSniffer Coding Standard "Copying" Installer
@@ -25,7 +25,7 @@ use Loadsys\Composer\PhpcsCodingStandardHook;
  * to perform additional detection of Coding Standard folders in the
  * current package, and copies them to the CodeSniffer/Standards folder.
  */
-class PhpcsCodingStandardInstaller extends LibraryInstaller {
+class CodingStandardInstaller extends LibraryInstaller {
 
     /**
      * Initializes library installer.
@@ -37,7 +37,7 @@ class PhpcsCodingStandardInstaller extends LibraryInstaller {
      */
     public function __construct(IOInterface $io, Composer $composer, $type = 'library', Filesystem $filesystem = null, $hook = null) {
     	parent::__construct($io, $composer, $type, $filesystem);
-    	$this->hook = (!is_null($hook) ? $hook : new PhpcsCodingStandardHook());
+    	$this->hook = (!is_null($hook) ? $hook : new CodingStandardHook());
 	}
 
 	/**
@@ -51,7 +51,7 @@ class PhpcsCodingStandardInstaller extends LibraryInstaller {
 	 * @return bool True if this installer should be activated for the package in question, false if not.
 	 */
 	public function supports($packageType) {
-		return ($packageType === PhpcsCodingStandardHook::PHPCS_PACKAGE_TYPE);
+		return ($packageType === CodingStandardHook::PHPCS_PACKAGE_TYPE);
 	}
 
 	/**

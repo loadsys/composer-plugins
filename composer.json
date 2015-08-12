@@ -21,8 +21,13 @@
         }
     ],
     "autoload": {
-        "psr-0": {
-            "Loadsys\\Composer": "src/"
+        "psr-4": {
+            "Loadsys\\Composer\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Loadsys\\Composer\\Test\\": "tests"
         }
     },
     "extra": {

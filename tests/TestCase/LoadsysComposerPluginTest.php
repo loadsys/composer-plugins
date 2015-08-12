@@ -1,5 +1,5 @@
 <?php
-namespace Loadsys\Composer\Test;
+namespace Loadsys\Composer\Test\TestCase;
 
 use Loadsys\Composer\LoadsysComposerPlugin;
 use Composer\IO\IOInterface;
@@ -65,10 +65,10 @@ class LoadsysComposerPluginTest extends \PHPUnit_Framework_TestCase {
 
         $this->composer->expects($this->at(1))
             ->method('addInstaller')
-            ->with($this->isInstanceOf('Loadsys\Composer\PuphpetReleaseInstaller'));
+            ->with($this->isInstanceOf('Loadsys\Composer\Puphpet\ReleaseInstaller'));
         $this->composer->expects($this->at(3))
             ->method('addInstaller')
-            ->with($this->isInstanceOf('Loadsys\Composer\PhpcsCodingStandardInstaller'));
+            ->with($this->isInstanceOf('Loadsys\Composer\PhpCodesniffer\CodingStandardInstaller'));
 
         $this->plugin->activate($this->composer, $this->io);
     }

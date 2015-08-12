@@ -13,14 +13,14 @@
 	bootstrap="tests/bootstrap.php"
 >
 	<testsuites>
-		<testsuite name="Test Suite">
-			<directory>tests/Loadsys/Composer</directory>
+		<testsuite name="all">
+			<directory>tests/TestCase</directory>
 		</testsuite>
 	</testsuites>
 
 	<filter>
 		<whitelist>
-			<directory>src/Loadsys/Composer</directory>
+			<directory>src</directory>
 		</whitelist>
 	</filter>
 </phpunit>
