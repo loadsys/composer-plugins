@@ -1,0 +1,27 @@
+language: php
+sudo: false
+php:
+  - '5.6'
+#  - '5.5'
+#  - '5.4'
+#matrix:
+#  fast_finish: true
+env:
+  global:
+    # Contains a $GITHUB_TOKEN env var for use with composer to avoid API limits.
+    - secure: "hsmni1Mi9zCjYaGaCpRnXPYzdBywqPyhKQdrcS4cxJpCIPROd1Txtj8KKa2hdHp6f/xObd3zAqQeJgKDIzkj3ht0D1Za7BCuh+fY21F76k1u/SXIATgq7kk+vFg83EfcuojW4WI94FRhCfJ2bUOzZOpTzpsteo8vadyCJHHztXjcEnvmd9WrTI7OyeMTO/C51dq1yUJyJ1X/XdgwC2VrsUJLAIQzlvEenW7jQzmLp6F2T7b9sh7QrheSmqjX6A8SiN2PBe9YHQgpg0s9Rck3phiG+Th7L+Kpudc+M83a8izI4djyITevZc8l84dHYyonkh68jTNgCjOEz7gRmhuUUAXEaGLeZOJSiwbQKJ8juqPWA9eqTu4x8AR3b56ONb5TVATKNqpNSkzsYu43vtxqsaVsH8GLA3ic3KewRRM9awiLZyuZ1Npk5riD1UhgXv0CdR5geAQmgUh50PGwVcYNFm5/wz9hKaTBevbv1a1fXPzjQqB6aiV/qa7KQppSuYI3h1APOhxpFofQbKy+2plFTPjvWwpowJ3HjULuhSx5Nd7Gg4I8plCfo8yhI8VODOW4KYyh2617hBq2nMvEyS9/DgZ5Bix/mOuOoJMJ/fKnmXS49QLUMadcLSBMlKTUBgEuDtXuK3Q6RgYAY8KUMw6i5Dpu2mPAocoGR1T6ZaDr7Qs="
+branches:
+  except:
+    - gh-pages
+install:
+  - composer self-update --no-interaction
+  - composer config -g github-oauth.github.com $GITHUB_TOKEN
+  - composer install --no-interaction
+  - git clone https://github.com/loadsys/puphpet-release.git build/release-project
+script:
+  # Run unit tests.
+  - vendor/bin/phpunit
+  # Run integration tests.
+  - tests/integration/simulate-composer-install.sh -t master
+notifications:
+  email: false

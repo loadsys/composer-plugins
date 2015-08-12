@@ -2,7 +2,7 @@
 	"name": "me/test-composer-installer",
 	"description": "Template file for testing the puphpet-release-composer-installer. Written to ../tmp/ with proper branch names.",
 	"require": {
-		"loadsys/puphpet-release-composer-installer": "dev-PRCI_BRANCH_NAME",
+		"loadsys/composer-plugins": "dev-PRCI_BRANCH_NAME",
 		"loadsys/puphpet-release": "dev-PR_BRANCH_NAME"
 	},
 	"repositories": [
