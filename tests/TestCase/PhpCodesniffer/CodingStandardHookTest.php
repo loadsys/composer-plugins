@@ -105,7 +105,7 @@ class CodingStandardHookTest extends \PHPUnit_Framework_TestCase {
 				->willReturn($path);
 		}
 
-        $event = $this->getMockBuilder('\Composer\Installer\PackageEvent')
+        $event = $this->getMockBuilder('\Composer\Script\Event')
 			->disableOriginalConstructor()
 			->setMethods(array('getComposer'))
 			->getMock();

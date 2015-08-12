@@ -12,14 +12,14 @@
 
 namespace Loadsys\Composer\PhpCodesniffer;
 
-use Composer\Script\Event;
-use Composer\Installer\PackageEvent;
 
 
 use Composer\Composer;
 use Composer\IO\IOInterface;
+use Composer\Installer\PackageEvent;
 use Composer\Package\Package;
 use Composer\Package\PackageInterface;
+use Composer\Script\Event;
 use Composer\Util\Filesystem;
 use \RecursiveCallbackFilterIterator;
 use \RecursiveDirectoryIterator;
@@ -61,10 +61,10 @@ class CodingStandardHook {
 	 * No-op if there are no `ruleset.xml` files or the PHP CodeSniffer
 	 * package is not installed, making it safe to run on every package.
 	 *
-	 * @param \Composer\Installer\PackageEvent $event The composer Package event being fired.
+	 * @param \Composer\Script\Event $event The composer event being fired.
 	 * @return void
 	 */
-	public static function postInstall(PackageEvent $event) {
+	public static function postInstall(Event $event) {
 		$composer = $event->getComposer();
 		$packages = $composer
 			->getRepositoryManager()
