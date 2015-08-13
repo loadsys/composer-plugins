@@ -122,7 +122,7 @@ class CodingStandardHook {
 	 */
 	public static function mirrorCodingStandardFolders(Composer $composer, $packageBasePath) {
 		$rulesets = self::findRulesetFolders($packageBasePath);
-		$destDir = self::findCodesnifferRoot($composer);
+		$destDir = self::findStandardsFolder($composer);
 
 		// No-op if no ruleset.xml's found or squizlabs/php_codesniffer not installed.
 		if (empty($rulesets) || !$destDir) {
@@ -174,7 +174,7 @@ class CodingStandardHook {
 	 */
 	public static function deleteCodingStandardFolders(Composer $composer, $packageBasePath) {
 		$rulesets = self::findRulesetFolders($packageBasePath);
-		$destDir = self::findCodesnifferRoot($composer);
+		$destDir = self::findStandardsFolder($composer);
 
 		// No-op if no ruleset.xml's found.
 		if (empty($rulesets) || !$destDir) {
@@ -205,23 +205,31 @@ class CodingStandardHook {
 	}
 
 	/**
-	 * Attempt to locate the squizlabs/php_codesniffer/standards folder.
+	 * Attempt to locate the squizlabs/php_codesniffer/[...]/Standards folder.
 	 *
-	 * Return the full system path if found, no trailing slash.
+	 * Return the full system path if found, no trailing slash. Attempts to
+	 * be compatible with both PHP_CodeSniffer v2.x and v3.x.
 	 *
 	 * @param Composer\Composer $composer Used to get access to the InstallationManager.
-	 * @return string|false Full system path to the PHP CodeSniffer's "standards/" folder, false if not found.
+	 * @return string|false Full system path to the PHP CodeSniffer's "Standards/" folder, false if not found.
 	 */
-	protected static function findCodesnifferRoot(Composer $composer) {
+	protected static function findStandardsFolder(Composer $composer) {
 		$phpcsPackage = new Package('squizlabs/php_codesniffer', '2.0', '');
-		$path = $composer->getInstallationManager()->getInstallPath($phpcsPackage);
+		$base = $composer->getInstallationManager()->getInstallPath($phpcsPackage);
 
-		$path .= DS . 'CodeSniffer' . DS . 'Standards';
-		if (!is_readable($path)) {
-			return false;
+		$subPaths = [
+			'src' . DS . 'Standards', // PHPCS v3
+			'CodeSniffer' . DS . 'Standards', // v2
+		];
+
+		foreach ($subPaths as $subPath) {
+			$path = $base . DS . $subPath;
+			if (is_dir($path) && is_readable($path)) {
+				return $path;
+			}
 		}
 
-		return $path;
+		return false;
 	}
 
 

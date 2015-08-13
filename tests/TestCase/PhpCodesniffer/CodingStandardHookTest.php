@@ -18,8 +18,8 @@ class TestCodingStandardHook extends CodingStandardHook {
 	public static function findRulesetFolders($basePath) {
 		return parent::findRulesetFolders($basePath);
 	}
-	public static function findCodesnifferRoot(Composer $composer) {
-		return parent::findCodesnifferRoot($composer);
+	public static function findStandardsFolder(Composer $composer) {
+		return parent::findStandardsFolder($composer);
 	}
 }
 
@@ -210,16 +210,16 @@ class CodingStandardHookTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * test findCodesnifferRoot()
+	 * test findStandardsFolder()
 	 *
 	 * @return void
 	 */
-	public function testFindCodesnifferRootExists() {
+	public function testFindStandardsFolderExists() {
 		list($composer, $event) = $this->mockComposerAndEvent([
 			1 => $this->phpcsInstallDir,
 		]);
 
-		$result = TestCodingStandardHook::findCodesnifferRoot($composer);
+		$result = TestCodingStandardHook::findStandardsFolder($composer);
 
 		$this->assertEquals(
 			$this->standardsInstallDir,
@@ -229,16 +229,16 @@ class CodingStandardHookTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * test findCodesnifferRoot()
+	 * test findStandardsFolder()
 	 *
 	 * @return void
 	 */
-	public function testFindCodesnifferRootDoesNotExist() {
+	public function testFindStandardsFolderDoesNotExist() {
 		list($composer, $package) = $this->mockComposerAndEvent([
 			1 => 'does-not-exist',
 		]);
 
-		$result = TestCodingStandardHook::findCodesnifferRoot($composer);
+		$result = TestCodingStandardHook::findStandardsFolder($composer);
 
 		$this->assertFalse(
 			$result,
