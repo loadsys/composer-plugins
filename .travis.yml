@@ -17,11 +17,7 @@ install:
   - composer self-update --no-interaction
   - composer config -g github-oauth.github.com $GITHUB_TOKEN
   - composer install --no-interaction
-  - git clone https://github.com/loadsys/puphpet-release.git build/release-project
 script:
-  # Run unit tests.
   - vendor/bin/phpunit
-  # Run integration tests.
-  - tests/integration/simulate-composer-install.sh -t master
 notifications:
   email: false

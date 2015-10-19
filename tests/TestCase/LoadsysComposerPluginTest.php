@@ -65,9 +65,6 @@ class LoadsysComposerPluginTest extends \PHPUnit_Framework_TestCase {
 
 		$this->composer->expects($this->at(1))
 			->method('addInstaller')
-			->with($this->isInstanceOf('Loadsys\Composer\Puphpet\ReleaseInstaller'));
-		$this->composer->expects($this->at(3))
-			->method('addInstaller')
 			->with($this->isInstanceOf('Loadsys\Composer\PhpCodesniffer\CodingStandardInstaller'));
 
 		$this->plugin->activate($this->composer, $this->io);

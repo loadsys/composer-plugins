@@ -7,10 +7,7 @@
     	"loadsys",
     	"codesniffer",
     	"puphpet",
-    	"vagrant",
-    	"dangerous",
-    	"do-not-use",
-    	"overwrites-files"
+    	"vagrant"
     ],
     "type": "composer-plugin",
     "license": "MIT",
