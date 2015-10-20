@@ -7,7 +7,7 @@ Including this package in your composer.json makes a number of installers and pr
 
 
 
-## PHP CodeSniffer, `phpcs-coding-standard` type (config editing approach)
+## PHP CodeSniffer, `phpcs-coding-standard` type (copying folders approach)
 
 When you develop your own Coding Standard for the [PHP CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer), you can package it for installation via Composer, but `phpcs` won't know about your standard unless you either manually specify it on the command line every time:
 
@@ -84,6 +84,12 @@ The `prePackageUninstall` removes any Coding Standard folders from a package tha
 
 ## PHP CodeSniffer, post-install hook (config editing approach)
 
+:warning: Speculative! :warning:
+
+@TODO: _This approach is partially coded already, but the plan is to eventually use an `extra` flag in the composer.json file to determine whether to copy standards folders or manage entries in phpcs's config file. This approach could be used both by the `phpcs-coding-standard` type as well as the postInstall hooks._
+
+
+
 Sometimes you want to use somebody else's coding standard package where you can't set the `type` explicitly. In cases like this, this package provides composer hook scripts that can be used to accomplish the same effect.
 
 The script works by scanning each installed package for any folders containing a `ruleset.xml` file (which indicates that folder contains a Coding Standard.) It then adds the vendor paths for these folders into the `CodeSniffer.conf` file, making them available to `phpcs` in their natural install location.
@@ -119,6 +125,8 @@ The `postPackageUninstall` removes the path for a package that is being removed 
 
 ## Contributing
 
+Create an issue or submit a pull request.
+
 ### Running Unit Tests
 
 * `composer install`
@@ -129,11 +137,11 @@ The `postPackageUninstall` removes the path for a package that is being removed 
 
 ## License
 
-[MIT](https://github.com/loadsys/puphpet-release/blob/master/LICENSE). In particular, all [PuPHPet](http://puphpet.com) work belongs to the original authors. This project is strictly for our own convenience.
+[MIT](https://github.com/loadsys/puphpet-release/blob/master/LICENSE).
 
 
 
 
 ## Copyright
 
-&copy; [Loadsys Web Strategies](http://loadsys.com) 2015
+&copy; 2015 [Loadsys Web Strategies](http://loadsys.com)

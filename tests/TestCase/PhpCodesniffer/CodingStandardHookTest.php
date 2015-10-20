@@ -128,7 +128,7 @@ class CodingStandardHookTest extends \PHPUnit_Framework_TestCase {
 	 * @return void
 	 */
 	public function testPostInstallNoStandards() {
-		$this->marktestIncomplete('@TODO: Write a test where the package does not have any stanrds to install.');
+		$this->marktestIncomplete('@TODO: Write a test where the package does not have any standards to install.');
 	}
 
 	/**
@@ -242,7 +242,7 @@ class CodingStandardHookTest extends \PHPUnit_Framework_TestCase {
 
 		$this->assertFalse(
 			$result,
-			'False shouldbe returned for a non-existent path.'
+			'False should be returned for a non-existent path.'
 		);
 	}
 
